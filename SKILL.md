@@ -22,7 +22,8 @@ Do NOT ask the user what range they want unless their request is ambiguous. Pref
 
 - "看用量" / "usage" / no args → `report --preset today`
 - "昨天" / "yesterday" → `report --preset yesterday`
-- "这周" / "this week" → `report --last 7d`
+- "这周" / "this week" / "最近7天" → `report --last 7d` (含今天)
+- "最近30天" → `report --last 30d` (含今天)
 - "这个月" / "this month" → `report --preset this-month`
 - Explicit date range → `report --since ... --until ...`
 
