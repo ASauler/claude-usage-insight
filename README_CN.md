@@ -125,7 +125,7 @@ python3 scripts/claude_usage_insight.py top --by project --last 7d
 
 ## 致谢
 
-定价模型参考了 [ccusage](https://github.com/ryoppippi/ccusage)，其使用 [LiteLLM](https://github.com/BerriAI/litellm) 的定价数据。
+灵感来自 [ccusage](https://github.com/ryoppippi/ccusage)。定价数据参考 [LiteLLM](https://github.com/BerriAI/litellm)。
 
 ## License
 

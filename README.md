@@ -129,7 +129,7 @@ Re-running the same range overwrites the file. No timestamp suffix, no pileup.
 
 ## Credits
 
-Pricing model referenced from [ccusage](https://github.com/ryoppippi/ccusage), which uses [LiteLLM](https://github.com/BerriAI/litellm) pricing data.
+Inspired by [ccusage](https://github.com/ryoppippi/ccusage). Pricing data referenced from [LiteLLM](https://github.com/BerriAI/litellm).
 
 ## License
 
