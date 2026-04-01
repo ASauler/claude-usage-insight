@@ -4,6 +4,8 @@
 
 Claude Code 本地用量分析工具。从 `~/.claude` 数据生成 HTML 报告 — 不调 API，数据不出本机。
 
+![报告预览](screenshots/report-7d.png)
+
 ## 功能
 
 - 扫描 `~/.claude/projects/**/*.jsonl` 获取每次请求的 token 用量

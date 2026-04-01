@@ -6,6 +6,8 @@ A local analytics tool for Claude Code usage data. Generates HTML reports from `
 
 ![Demo](https://img.shields.io/badge/Claude_Code-Skill-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
+![Report Preview](screenshots/report-7d.png)
+
 ## What it does
 
 - Scans `~/.claude/projects/**/*.jsonl` for token usage per request
