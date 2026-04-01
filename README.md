@@ -24,6 +24,8 @@ A local analytics tool for Claude Code usage data. Generates HTML reports from `
 
 ## Quick Start
 
+**The easiest way: just ask Claude Code in natural language.** Type things like "show me today's usage", "how much did I use this week", or "usage report for last 30 days" — it will generate the report automatically.
+
 ### As a Claude Code Skill
 
 Copy to your skills directory:

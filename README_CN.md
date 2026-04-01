@@ -22,6 +22,8 @@ Claude Code 本地用量分析工具。从 `~/.claude` 数据生成 HTML 报告 
 
 ## 快速开始
 
+**最简单的方式：直接在 Claude Code 对话框里问。** 比如"看用量"、"最近7天花了多少"、"上个月的报告" — 会自动生成 HTML 报告并打开。
+
 ### 作为 Claude Code Skill
 
 ```bash
