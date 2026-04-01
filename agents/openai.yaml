@@ -1,0 +1,4 @@
+interface:
+  display_name: "Claude Usage Insight"
+  short_description: "Analyze local Claude Code usage and token breakdowns"
+  default_prompt: "Use $claude-usage-insight to show where my Claude Code usage went for today."
