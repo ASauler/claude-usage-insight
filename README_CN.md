@@ -64,8 +64,8 @@ python3 scripts/claude_usage_insight.py top --by project --last 7d
 |------|------|
 | `today` | 今天（默认） |
 | `yesterday` | 昨天 |
-| `last-7d` | 最近 7 天 |
-| `last-30d` | 最近 30 天 |
+| `last-7d` | 最近 7 天（含今天） |
+| `last-30d` | 最近 30 天（含今天） |
 | `this-month` | 本月 |
 | `last-month` | 上月 |
 
@@ -122,6 +122,10 @@ python3 scripts/claude_usage_insight.py top --by project --last 7d
 - Python 3.9+
 - 无外部依赖（纯标准库）
 - macOS 自动打开 HTML 报告
+
+## 致谢
+
+定价模型参考了 [ccusage](https://github.com/ryoppippi/ccusage)，其使用 [LiteLLM](https://github.com/BerriAI/litellm) 的定价数据。
 
 ## License
 

@@ -66,8 +66,8 @@ python3 scripts/claude_usage_insight.py top --by project --last 7d
 |--------|-------------|
 | `today` | Current day (default) |
 | `yesterday` | Previous day |
-| `last-7d` | Last 7 days |
-| `last-30d` | Last 30 days |
+| `last-7d` | Last 7 days (including today) |
+| `last-30d` | Last 30 days (including today) |
 | `this-month` | Current month |
 | `last-month` | Previous month |
 
@@ -126,6 +126,10 @@ Re-running the same range overwrites the file. No timestamp suffix, no pileup.
 - Python 3.9+
 - No external dependencies (stdlib only)
 - macOS: auto-opens HTML report in browser
+
+## Credits
+
+Pricing model referenced from [ccusage](https://github.com/ryoppippi/ccusage), which uses [LiteLLM](https://github.com/BerriAI/litellm) pricing data.
 
 ## License
 
