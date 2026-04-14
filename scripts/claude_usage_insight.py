@@ -815,7 +815,11 @@ def aggregate_by_period(requests: list[dict[str, Any]], time_range: dict[str, An
         buckets = aggregate_by_hour(requests)
         return {"granularity": "hour", "buckets": buckets}
 
-    # Daily for anything > 1 day
+    if span_days > 45:
+        # Weekly for ranges over ~6 weeks
+        return _aggregate_weekly(requests, start, end, local_tz)
+
+    # Daily for anything between 1.5 and 45 days
     per_day: dict[str, dict[str, int]] = {}
     for req in requests:
         day_key = req["local_dt"].strftime("%m/%d")
@@ -831,6 +835,37 @@ def aggregate_by_period(requests: list[dict[str, Any]], time_range: dict[str, An
         all_days.append(per_day.get(key, {"label": key, "tokens": 0, "requests": 0}))
         cur += dt.timedelta(days=1)
     return {"granularity": "day", "buckets": all_days}
+
+
+def _aggregate_weekly(requests: list[dict[str, Any]], start: dt.datetime, end: dt.datetime, local_tz: dt.tzinfo) -> dict[str, Any]:
+    """Aggregate into ISO weeks for long ranges."""
+    per_week: dict[str, dict[str, Any]] = {}
+    for req in requests:
+        local_d = req["local_dt"].date()
+        # Monday of the week
+        week_start = local_d - dt.timedelta(days=local_d.weekday())
+        key = week_start.isoformat()
+        if key not in per_week:
+            label = week_start.strftime("%m/%d")
+            per_week[key] = {"label": label, "tokens": 0, "requests": 0, "_sort": week_start}
+        per_week[key]["tokens"] += req["total_tokens"]
+        per_week[key]["requests"] += 1
+
+    # Fill missing weeks
+    cur = start.astimezone(local_tz).date()
+    cur = cur - dt.timedelta(days=cur.weekday())  # snap to Monday
+    end_date = end.astimezone(local_tz).date()
+    all_weeks = []
+    while cur < end_date:
+        key = cur.isoformat()
+        if key in per_week:
+            bucket = per_week[key]
+            del bucket["_sort"]
+            all_weeks.append(bucket)
+        else:
+            all_weeks.append({"label": cur.strftime("%m/%d"), "tokens": 0, "requests": 0})
+        cur += dt.timedelta(days=7)
+    return {"granularity": "week", "buckets": all_weeks}
 
 
 def aggregate_heatmap(requests: list[dict[str, Any]], time_range: dict[str, Any], local_tz: dt.tzinfo) -> dict[str, Any]:
@@ -1167,7 +1202,11 @@ def render_summary_markdown(payload: dict[str, Any], limit: int) -> str:
         lines.append("")
         lines.append("**Insights**")
         for row in payload["insights"][:limit]:
-            lines.append(f"- `{row['label']}` · {row['message']}")
+            project = row.get("project", "?")
+            session = row.get("session", "")
+            cold = row.get("cold")
+            cold_str = f"cold starts: {cold['count']} ({cold['tokens']})" if cold else "no cold starts"
+            lines.append(f"- `{project}` {session} · {cold_str}")
 
     return "\n".join(lines)
 
@@ -1315,24 +1354,48 @@ def render_report_html(payload: dict[str, Any]) -> str:
             )
         return "".join(rendered)
 
-    # Adaptive activity chart
+    # Adaptive activity chart — use log scale when range > 100x to keep small bars visible
     chart_cells = []
     num_cols = len(act_buckets)
     bar_height = 160
-    for b in act_buckets:
-        height = 0 if act_max == 0 else int((b["tokens"] / act_max) * bar_height)
+    act_min_nonzero = min((b["tokens"] for b in act_buckets if b["tokens"] > 0), default=0)
+    use_log = act_max > 0 and act_min_nonzero > 0 and (act_max / act_min_nonzero) > 100
+    log_max = math.log1p(act_max) if use_log else 0
+
+    # Decide label thinning: show every Nth label when there are too many columns
+    if num_cols <= 14:
+        label_step = 1
+    elif num_cols <= 30:
+        label_step = 2
+    elif num_cols <= 60:
+        label_step = 4
+    else:
+        label_step = 7
+
+    for idx, b in enumerate(act_buckets):
+        if act_max == 0:
+            height = 0
+        elif use_log:
+            height = int((math.log1p(b["tokens"]) / log_max) * bar_height) if b["tokens"] > 0 else 0
+        else:
+            height = int((b["tokens"] / act_max) * bar_height)
+        # Ensure nonzero values get at least a visible bar
+        if b["tokens"] > 0 and height < 6:
+            height = 6
         tok = format_number(b['tokens'])
         req = b['requests']
         if act_gran == "hour":
             label = f"{b['hour']:02d}"
         else:
             label = b.get("label", "")
+        show_label = (idx % label_step == 0)
+        display_label = escape(label) if show_label else ""
         chart_cells.append(
             f"<div class='bar-col'>"
             f"<div class='bar-stick' style='height:{height}px'>"
             f"<div class='popup'><div class='pop-val'>{tok}</div><div class='pop-sub'>{req} requests</div></div>"
             f"</div>"
-            f"<div class='bar-label'>{escape(label)}</div>"
+            f"<div class='bar-label'>{display_label}</div>"
             "</div>"
         )
     gran_labels = {"hour": "Hourly", "day": "Daily", "week": "Weekly"}
